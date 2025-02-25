@@ -1,0 +1,17 @@
+package com.jellyfish.calculator.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Data
+public class Calculation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String projectName;
+    private double totalCost;
+    private int estimatedHours;
+}
