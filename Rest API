@@ -1,0 +1,49 @@
+package com.jellyfish.calculator.controller;
+
+import com.jellyfish.calculator.model.IfcFile;
+import com.jellyfish.calculator.repository.IfcFileRepository;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+
+@RestController
+@RequestMapping("/api")
+@CrossOrigin(origins = "*")
+public class FileUploadController {
+
+    private final IfcFileRepository repository;
+    private static final String UPLOAD_DIR = "uploads/";
+
+    public FileUploadController(IfcFileRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostMapping("/upload")
+    public String uploadFile(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty() || !file.getOriginalFilename().endsWith(".ifc")) {
+            return "Ugyldig filtype! Vennligst last opp en IFC-fil.";
+        }
+
+        try {
+            File uploadDir = new File(UPLOAD_DIR);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            String filePath = UPLOAD_DIR + file.getOriginalFilename();
+            file.transferTo(new File(filePath));
+
+            IfcFile ifcFile = new IfcFile();
+            ifcFile.setFileName(file.getOriginalFilename());
+            ifcFile.setFilePath(filePath);
+            ifcFile.setFileSize(file.getSize());
+            repository.save(ifcFile);
+
+            return "Fil lastet opp: " + file.getOriginalFilename();
+        } catch (IOException e) {
+            return "Feil ved opplasting av fil: " + e.getMessage();
+        }
+    }
+}
