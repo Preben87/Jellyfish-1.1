@@ -1,0 +1,17 @@
+package com.jellyfish.calculator.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Data
+public class IfcFile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String fileName;
+    private String filePath;
+    private Long fileSize;
+}
