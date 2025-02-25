@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyfish BIM Kalkulator</title>
+    <script type="module">
+        import { IfcLoader } from "https://unpkg.com/web-ifc@0.0.61/dist/index.mjs";
+
+        async function processIFC(file) {
+            const ifcLoader = new IfcLoader();
+            const reader = new FileReader();
+
+            reader.onload = async (event) => {
+                const ifcData = new Uint8Array(event.target.result);
+                const model = await ifcLoader.parse(ifcData);
+
+                const numElements = Object.keys(model.entities).length;
+                document.getElementById("metadata").innerText = `Antall IFC-elementer: ${numElements}`;
+
+                const response = await fetch("http://localhost:8080/api/holte/timeverk");
+                const hourlyRate = await response.json();
+
+                const estimatedHours = numElements * 1.5; // Anta 1.5 timer per element
+                const totalCost = estimatedHours * hourlyRate;
+                document.getElementById("cost-estimate").innerText = `Kostnadsestimat: ${totalCost} NOK`;
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        document.getElementById("upload-btn").addEventListener("click", async () => {
+            const file = document.getElementById("ifc-file").files[0];
+            processIFC(file);
+        });
+    </script>
+</head>
+<body>
+    <h3>Jellyfish BIM Kalkulator</h3>
+    <input type="file" id="ifc-file" accept=".ifc">
+    <button id="upload-btn">Last opp IFC</button>
+    <p id="metadata"></p>
+    <p id="cost-estimate"></p>
+</body>
+</html>
