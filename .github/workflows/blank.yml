@@ -13,9 +13,9 @@ async function init() {
   placePicker.addEventListener('gmpx-placechange', () => {
     const place = placePicker.value;
 
-    if (!place.location) {
+    if (!place || !place.location) {
       window.alert(
-        "No details available for input: '" + place.name + "'"
+        `No details available for input: '${place?.name || 'Unknown'}'`
       );
       infowindow.close();
       marker.position = null;
@@ -32,10 +32,26 @@ async function init() {
     marker.position = place.location;
     infowindow.setContent(
       `<strong>${place.displayName}</strong><br>
-       <span>${place.formattedAddress}</span>
-    `);
+       <span>${place.formattedAddress}</span>`
+    );
     infowindow.open(map.innerMap, marker);
   });
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// API integration for Railway deployment
+const API_BASE_URL = 'https://your-railway-api-url.com';
+
+async function fetchPlaceData(placeId) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/places/${placeId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch place data');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching place data:', error);
+    return null;
+  }
+}
